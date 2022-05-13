@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hybrix_task/services/auth_service.dart';
+import 'package:hybrix_task/services/user_location_service.dart';
 import 'package:hybrix_task/views/login.dart';
 import 'package:hybrix_task/views/home.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,10 @@ void main() async {
     providers: [
       ChangeNotifierProvider(
         create: (context) => AuthService(),
-      )
+      ),
+      ChangeNotifierProvider(
+        create: (context) => UserLocationService(),
+      ),
     ],
     child: const MyApp(),
   ));
