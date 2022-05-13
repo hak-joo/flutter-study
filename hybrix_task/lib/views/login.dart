@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hybrix_task/services/auth_service.dart';
+import 'package:hybrix_task/views/home.dart';
 import 'package:hybrix_task/views/register.dart';
 import 'package:provider/provider.dart';
 
@@ -58,6 +59,10 @@ class _LoginPageState extends State<LoginPage> {
                         onSuccess: () {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(SnackBar(content: Text("로그인 성공!")));
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage()));
                         },
                         onError: (err) {
                           ScaffoldMessenger.of(context)
