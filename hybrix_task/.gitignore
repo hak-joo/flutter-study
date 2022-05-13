@@ -54,7 +54,7 @@ app.*.map.json
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
-android/app/src/main/AndroidManifest.xml
+**/android/app/src/main/AndroidManifest.xml
 *.jks
 
 # iOS/XCode related
@@ -84,8 +84,8 @@ android/app/src/main/AndroidManifest.xml
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Flutter/.last_build_id
-Runner/Info.plist
-Runner/AppDelegate.swift
+**/ios/Runner/Info.plist
+**/ios/Runner/AppDelegate.swift
 # web
 web/firebase-config.js
 
