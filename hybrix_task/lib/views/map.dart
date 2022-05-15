@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +44,10 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
   double? Latitude = 37.497952;
   double? Longitude = 127.027619;
 
+  double? stayLatitude;
+  double? stayLongitude;
+  DateTime? stayDateTime;
+
   // 애플리케이션에서 지도를 이동하기 위한 컨트롤러
   late GoogleMapController _controller;
 
@@ -53,16 +57,16 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
       CameraPosition(target: LatLng(21.017901, -128.847953));
 
   // 지도 클릭 시 표시할 장소에 대한 마커 목록
-  final List<Marker> markers = [];
+  // final List<Marker> markers = [];
 
-  addMarker(cordinate) {
-    int id = Random().nextInt(100);
+  // addMarker(cordinate) {
+  //   int id = Random().nextInt(100);
 
-    setState(() {
-      markers
-          .add(Marker(position: cordinate, markerId: MarkerId(id.toString())));
-    });
-  }
+  //   setState(() {
+  //     markers
+  //         .add(Marker(position: cordinate, markerId: MarkerId(id.toString())));
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +85,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
             _controller = controller;
           });
         },
-        markers: markers.toSet(),
+        // markers: markers.toSet(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -142,11 +146,12 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
       if (isPlaying == true) {
         setState(() {
           sec++;
-          if (sec == 60) {
+          print(sec);
+          if (sec == 30) {
             sec = 0;
             getLocation();
+            updateUserStay();
             min++;
-
             if (min == 60) {
               min = 0;
               hour++;
@@ -166,5 +171,57 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
         timer.cancel();
       }
     });
+  }
+
+  double getDistance(lat1, lon1, lat2, lon2) {
+    if ((lat1 == lat2) && (lon1 == lon2)) {
+      return 0;
+    }
+    var radLat1 = math.pi * lat1 / 180;
+    var radLat2 = math.pi * lat2 / 180;
+    var theta = lon1 - lon2;
+    var radTheta = math.pi * theta / 180;
+    var dist = math.sin(radLat1) * math.sin(radLat2) +
+        math.cos(radLat1) * math.cos(radLat2) * math.cos(radTheta);
+    if (dist > 1) dist = 1;
+
+    dist = math.acos(dist);
+    dist = dist * 180 / math.pi;
+    dist = dist * 60 * 1.1515 * 1.609344 * 1000;
+    if (dist < 100)
+      dist = (dist / 10).round() * 10;
+    else
+      dist = (dist / 100).round() * 100;
+    return dist;
+  }
+
+  void updateUserStay() {
+    print('update함수');
+    if (stayLatitude == null && stayLongitude == null && stayDateTime == null) {
+      // 정의되어 있지 않을 때 등록
+      print('등록');
+      setState(() {
+        stayLatitude = Latitude!;
+        stayLongitude = Longitude!;
+        stayDateTime = DateTime.now();
+      });
+    } else {
+      var dis =
+          getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!);
+      print('distance');
+      print(dis);
+      if (getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!) >
+          2000) {
+        //거리가 2km 벗어났다면 수행
+        print('벗어남');
+        var days = stayDateTime!.difference(DateTime.now()).inMinutes;
+        print(days);
+        setState(() {
+          stayLatitude = Latitude!;
+          stayLongitude = Longitude!;
+          stayDateTime = DateTime.now();
+        });
+      }
+    }
   }
 }
