@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginPage()));
+                                  builder: (context) => MainPage()));
                         },
                         onError: (err) {
                           ScaffoldMessenger.of(context)

@@ -54,7 +54,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
   // 지도가 시작될 때 첫 번째 위치 (강남으로 설정)
   // app이 로드되자마자 위치 추적을 시작하는 것이 아닌, Float button 클릭시 시작
   CameraPosition _initialPosition =
-      CameraPosition(target: LatLng(21.017901, -128.847953));
+      CameraPosition(target: LatLng(37.497952, 127.027619));
 
   // 지도 클릭 시 표시할 장소에 대한 마커 목록
   // final List<Marker> markers = [];
@@ -208,13 +208,12 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
     } else {
       var dis =
           getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!);
-      print('distance');
       print(dis);
       if (getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!) >
-          2000) {
-        //거리가 2km 벗어났다면 수행
-        print('벗어남');
-        var days = stayDateTime!.difference(DateTime.now()).inMinutes;
+          750) {
+        //거리가 750M 넘어갔을 때
+        var days = DateTime.now().difference(stayDateTime!).inMinutes;
+        print('차이 시간');
         print(days);
         setState(() {
           stayLatitude = Latitude!;
