@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hybrix_task/services/auth_service.dart';
 import 'package:hybrix_task/services/user_location_service.dart';
@@ -15,6 +16,7 @@ class UserReport extends StatefulWidget {
 
 class _UserReportState extends State<UserReport> {
   List<dynamic> locationList = [];
+  DateTime? selectedDate;
   @override
   void initState() {
     // TODO: implement initState
@@ -30,12 +32,36 @@ class _UserReportState extends State<UserReport> {
       return Scaffold(
         appBar: AppBar(
           title: Text("Location Logs"),
+          actions: [
+            IconButton(
+              icon: Icon(CupertinoIcons.calendar),
+              onPressed: () {
+                Future<DateTime?> future = showDatePicker(
+                        context: context,
+                        initialDate: selectedDate == null
+                            ? DateTime.now()
+                            : selectedDate!,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now())
+                    .then((value) {
+                  setState(() {
+                    if (value != null) {
+                      selectedDate = value;
+                    }
+                  });
+                });
+              },
+            )
+          ],
         ),
         body: Column(
           children: [
+            Text(selectedDate == null ? "날짜를 선택해주세요" : selectedDate.toString()),
             Expanded(
               child: FutureBuilder<QuerySnapshot>(
-                future: userLocationService.read(user.uid),
+                future: selectedDate == null
+                    ? userLocationService.read(user.uid)
+                    : userLocationService.readWithDate(user.uid, selectedDate!),
                 builder: (context, snapshot) {
                   final items = snapshot.data?.docs ?? [];
                   if (items.isEmpty) {
@@ -48,7 +74,13 @@ class _UserReportState extends State<UserReport> {
                       Timestamp timestamp = item.get('timestamp');
                       double latitude = item.get('latitude');
                       double longitude = item.get('longitude');
-                      return ListTile(title: Text(timestampToDate(timestamp)));
+                      print(timestamp);
+                      return ListTile(
+                          title: Text(timestampToDate(timestamp) +
+                              '\n위도: ' +
+                              latitude.toString() +
+                              ' 경도: ' +
+                              longitude.toString()));
                       // return ListTile(title: Text(timestamp.toString()));
                     },
                   );

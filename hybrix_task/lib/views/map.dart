@@ -41,12 +41,12 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
   var hour = 0;
   var isPlaying = false;
 
-  double? Latitude = 37.497952;
-  double? Longitude = 127.027619;
+  double? Latitude;
+  double? Longitude;
 
-  double? stayLatitude;
-  double? stayLongitude;
-  DateTime? stayDateTime;
+  // double? stayLatitude;
+  // double? stayLongitude;
+  // DateTime? stayDateTime;
 
   // 애플리케이션에서 지도를 이동하기 위한 컨트롤러
   late GoogleMapController _controller;
@@ -57,26 +57,24 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
       CameraPosition(target: LatLng(37.497952, 127.027619));
 
   // 지도 클릭 시 표시할 장소에 대한 마커 목록
-  // final List<Marker> markers = [];
+  final List<Marker> markers = [];
 
-  // addMarker(cordinate) {
-  //   int id = Random().nextInt(100);
+  addMarker(cordinate) {
+    int id = 1;
 
-  //   setState(() {
-  //     markers
-  //         .add(Marker(position: cordinate, markerId: MarkerId(id.toString())));
-  //   });
-  // }
+    setState(() {
+      markers
+          .add(Marker(position: cordinate, markerId: MarkerId(id.toString())));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
-            target: LatLng(
-              Latitude!,
-              Longitude!,
-            ),
+            target: LatLng(Latitude == null ? 37.497952 : Latitude!,
+                Longitude == null ? 127.027619 : Longitude!),
             zoom: 17),
         mapType: MapType.normal,
         myLocationEnabled: true,
@@ -130,13 +128,41 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      Latitude = position.latitude;
-      Longitude = position.longitude;
-      _initialPosition = CameraPosition(target: LatLng(Latitude!, Longitude!));
-      _controller
-          .animateCamera(CameraUpdate.newLatLng(LatLng(Latitude!, Longitude!)));
-    });
+    if (Latitude == null && Longitude == null) {
+      setState(() {
+        Latitude = position.latitude;
+        Longitude = position.longitude;
+        _initialPosition =
+            CameraPosition(target: LatLng(Latitude!, Longitude!));
+        _controller.animateCamera(
+            CameraUpdate.newLatLng(LatLng(Latitude!, Longitude!)));
+      });
+      userLocationService!.create(authService!.currentUser()!.uid,
+          Timestamp.now(), Latitude!, Longitude!);
+    } else {
+      if (getDistance(
+              Latitude, Longitude, position.latitude, position.longitude) >
+          100) {
+        // 100미터 밖으로 나갔을 때 위치 재할당 후 api 호출
+        setState(() {
+          Latitude = position.latitude;
+          Longitude = position.longitude;
+          min = 0;
+          _initialPosition =
+              CameraPosition(target: LatLng(Latitude!, Longitude!));
+          _controller.animateCamera(
+              CameraUpdate.newLatLng(LatLng(Latitude!, Longitude!)));
+        });
+        userLocationService!.create(authService!.currentUser()!.uid,
+            Timestamp.now(), Latitude!, Longitude!);
+      } else {
+        //거리가 유지되었고 1시간마다 수행할 때
+        if (min == 60) {
+          userLocationService!.create(authService!.currentUser()!.uid,
+              Timestamp.now(), Latitude!, Longitude!);
+        }
+      }
+    }
   }
 
   void start() {
@@ -147,11 +173,10 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
         setState(() {
           sec++;
           print(sec);
-          if (sec == 30) {
+          if (sec == 60) {
             sec = 0;
-            getLocation();
-            updateUserStay();
             min++;
+            getLocation();
             if (min == 60) {
               min = 0;
               hour++;
@@ -160,11 +185,6 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
             if (hour == 24) {
               hour = 0;
             }
-          }
-          if (sec == 0) {
-            userLocationService!.create(authService!.currentUser()!.uid,
-                Timestamp.now(), Latitude!, Longitude!);
-            print('send API');
           }
         });
       } else {
@@ -195,32 +215,32 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
     return dist;
   }
 
-  void updateUserStay() {
-    print('update함수');
-    if (stayLatitude == null && stayLongitude == null && stayDateTime == null) {
-      // 정의되어 있지 않을 때 등록
-      print('등록');
-      setState(() {
-        stayLatitude = Latitude!;
-        stayLongitude = Longitude!;
-        stayDateTime = DateTime.now();
-      });
-    } else {
-      var dis =
-          getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!);
-      print(dis);
-      if (getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!) >
-          750) {
-        //거리가 750M 넘어갔을 때
-        var days = DateTime.now().difference(stayDateTime!).inMinutes;
-        print('차이 시간');
-        print(days);
-        setState(() {
-          stayLatitude = Latitude!;
-          stayLongitude = Longitude!;
-          stayDateTime = DateTime.now();
-        });
-      }
-    }
-  }
+  // void updateUserStay() {
+  //   print('update함수');
+  //   if (stayLatitude == null && stayLongitude == null && stayDateTime == null) {
+  //     // 정의되어 있지 않을 때 등록
+  //     print('등록');
+  //     setState(() {
+  //       stayLatitude = Latitude!;
+  //       stayLongitude = Longitude!;
+  //       stayDateTime = DateTime.now();
+  //     });
+  //   } else {
+  //     var dis =
+  //         getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!);
+  //     print(dis);
+  //     if (getDistance(Latitude!, Longitude!, stayLatitude!, stayLongitude!) >
+  //         750) {
+  //       //거리가 750M 넘어갔을 때
+  //       var days = DateTime.now().difference(stayDateTime!).inMinutes;
+  //       print('차이 시간');
+  //       print(days);
+  //       setState(() {
+  //         stayLatitude = Latitude!;
+  //         stayLongitude = Longitude!;
+  //         stayDateTime = DateTime.now();
+  //       });
+  //     }
+  //   }
+  // }
 }
