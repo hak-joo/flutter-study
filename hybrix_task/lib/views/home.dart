@@ -44,7 +44,7 @@ class _MainPageState extends State<MainPage> {
                   },
                 )
               ]),
-          body: MapSample(),
+          body: Map(),
         ),
       );
     });

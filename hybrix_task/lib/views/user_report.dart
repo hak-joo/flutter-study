@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hybrix_task/services/auth_service.dart';
 import 'package:hybrix_task/services/user_location_service.dart';
+import 'package:hybrix_task/views/report_map.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -80,7 +81,14 @@ class _UserReportState extends State<UserReport> {
                               '\n위도: ' +
                               latitude.toString() +
                               ' 경도: ' +
-                              longitude.toString()));
+                              longitude.toString()),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ReportMap(latitude, longitude)));
+                          });
                       // return ListTile(title: Text(timestamp.toString()));
                     },
                   );

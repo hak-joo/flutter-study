@@ -11,14 +11,14 @@ import 'package:provider/provider.dart';
 
 Timer? timer;
 
-class MapSample extends StatefulWidget {
+class Map extends StatefulWidget {
   late final String title;
 
   @override
-  _MapSampleState createState() => _MapSampleState();
+  _MapState createState() => _MapState();
 }
 
-class _MapSampleState extends State<MapSample> with ChangeNotifier {
+class _MapState extends State<Map> with ChangeNotifier {
   AuthService? authService;
   UserLocationService? userLocationService;
 
@@ -30,7 +30,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
   @override
   void didChangeDependencies() {
     //위젯트리 외부에서 Provider를 전달받을 수 없다.
-    //수명주기를 통해 Provider와 Service들을 접근할 수 있도록 한다. init
+    //수명주기를 통해 Provider와 Service들을 접근할 수 있도록 한다.
     super.didChangeDependencies();
     authService = Provider.of<AuthService>(context);
     userLocationService = Provider.of<UserLocationService>(context);
@@ -91,7 +91,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
             isPlaying = !isPlaying;
           });
           if (isPlaying == true) {
-            getLocation();
+            getLocation(false);
             start();
           }
         },
@@ -104,7 +104,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
     );
   }
 
-  void getLocation() async {
+  void getLocation(bool flag) async {
     bool serviceEnabled;
     LocationPermission permission;
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -139,11 +139,13 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
       });
       userLocationService!.create(authService!.currentUser()!.uid,
           Timestamp.now(), Latitude!, Longitude!);
+      print('초기 세팅');
     } else {
       if (getDistance(
               Latitude, Longitude, position.latitude, position.longitude) >
           100) {
         // 100미터 밖으로 나갔을 때 위치 재할당 후 api 호출
+        print('벗어남');
         setState(() {
           Latitude = position.latitude;
           Longitude = position.longitude;
@@ -157,7 +159,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
             Timestamp.now(), Latitude!, Longitude!);
       } else {
         //거리가 유지되었고 1시간마다 수행할 때
-        if (min == 60) {
+        if (flag == true) {
           userLocationService!.create(authService!.currentUser()!.uid,
               Timestamp.now(), Latitude!, Longitude!);
         }
@@ -166,7 +168,7 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
   }
 
   void start() {
-    getLocation();
+    getLocation(false);
 
     timer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
       if (isPlaying == true) {
@@ -176,8 +178,9 @@ class _MapSampleState extends State<MapSample> with ChangeNotifier {
           if (sec == 60) {
             sec = 0;
             min++;
-            getLocation();
+            getLocation(false);
             if (min == 60) {
+              getLocation(true);
               min = 0;
               hour++;
             }
