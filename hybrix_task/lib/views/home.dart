@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hybrix_task/services/auth_service.dart';
-import 'package:hybrix_task/views/location.dart';
 import 'package:hybrix_task/views/login.dart';
 import 'package:hybrix_task/views/map.dart';
 import 'package:hybrix_task/views/user_report.dart';
@@ -16,6 +15,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
+    //로그인 여부를 확인하기 위한 Consumer.
     return Consumer<AuthService>(builder: (context, authService, child) {
       return MaterialApp(
         debugShowCheckedModeBanner: false,

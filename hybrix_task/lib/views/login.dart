@@ -59,6 +59,9 @@ class _LoginPageState extends State<LoginPage> {
                         onSuccess: () {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(SnackBar(content: Text("로그인 성공!")));
+
+                          /* 로그인 성공 후 MainPage로 이동하게 함.
+                          pushReplacement를 사용하여 현재 페이지를 pop함으로써 login page로 돌아가지 못하게 한다. */
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(

@@ -20,7 +20,6 @@ class _UserReportState extends State<UserReport> {
   DateTime? selectedDate;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -57,7 +56,32 @@ class _UserReportState extends State<UserReport> {
         ),
         body: Column(
           children: [
-            Text(selectedDate == null ? "날짜를 선택해주세요" : selectedDate.toString()),
+            GestureDetector(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    selectedDate == null
+                        ? "날짜를 선택해주세요"
+                        : selectedDate.toString().split(" ")[0],
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                onTap: () {
+                  Future<DateTime?> future = showDatePicker(
+                          context: context,
+                          initialDate: selectedDate == null
+                              ? DateTime.now()
+                              : selectedDate!,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now())
+                      .then((value) {
+                    setState(() {
+                      if (value != null) {
+                        selectedDate = value;
+                      }
+                    });
+                  });
+                }),
             Expanded(
               child: FutureBuilder<QuerySnapshot>(
                 future: selectedDate == null
@@ -75,20 +99,18 @@ class _UserReportState extends State<UserReport> {
                       Timestamp timestamp = item.get('timestamp');
                       double latitude = item.get('latitude');
                       double longitude = item.get('longitude');
-                      print(timestamp);
-                      return ListTile(
-                          title: Text(timestampToDate(timestamp) +
-                              '\n위도: ' +
-                              latitude.toString() +
-                              ' 경도: ' +
-                              longitude.toString()),
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ReportMap(latitude, longitude)));
-                          });
+                      return Card(
+                        child: ListTile(
+                            title:
+                                Center(child: Text(timestampToDate(timestamp))),
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ReportMap(latitude, longitude)));
+                            }),
+                      );
                       // return ListTile(title: Text(timestamp.toString()));
                     },
                   );
@@ -102,7 +124,7 @@ class _UserReportState extends State<UserReport> {
   }
 
   String timestampToDate(Timestamp timestamp) {
-    final f = new DateFormat("yyyy년 MM월 dd일 hh시 mm분 ss초");
+    final f = new DateFormat("yyyy년 MM월 dd일 HH시 mm분 ss초");
     var date = DateTime.parse(timestamp.toDate().toString());
     return f.format(date).toString();
   }

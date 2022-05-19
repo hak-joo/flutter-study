@@ -39,8 +39,8 @@ class _ReportMapState extends State<ReportMap> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(Latitude!.toString()),
-        ),
+            title: Text(Latitude!.toString() + ", " + Longitude!.toString(),
+                style: TextStyle(fontSize: 13.0))),
         body: GoogleMap(
           initialCameraPosition: CameraPosition(
             target: LatLng(Latitude!, Longitude!),

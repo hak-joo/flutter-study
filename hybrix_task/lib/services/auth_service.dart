@@ -27,6 +27,7 @@ class AuthService extends ChangeNotifier {
       );
       onSuccess();
     } on FirebaseAuthException catch (e) {
+      // 검증 후 결과 전달
       if (e.code == 'weak-password') {
         onError('비밀번호를 6자리 이상 입력해 주세요.');
       } else if (e.code == 'email-already-in-use') {
@@ -63,7 +64,7 @@ class AuthService extends ChangeNotifier {
       );
 
       onSuccess();
-      notifyListeners(); // 로그인 상태 변경
+      notifyListeners(); // 로그인 상태 변경 알림
     } on FirebaseAuthException catch (e) {
       onError(e.message!);
     } catch (e) {
